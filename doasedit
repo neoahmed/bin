@@ -1,0 +1,30 @@
+#!/bin/sh
+# Minimal sudoedit clone using doas
+
+if [ $# -eq 0 ]; then
+  echo "Usage: doasedit <file>..."
+  exit 1
+fi
+
+for file in "$@"; do
+  if [ ! -f "$file" ]; then
+    echo "File not found: $file"
+    exit 1
+  fi
+
+  tmp=$(mktemp /tmp/doasedit.XXXXXX) || exit 1
+
+  # Copy file to tmp and give it to the user
+  doas cp -- "$file" "$tmp"
+  doas chown "$USER:$USER" "$tmp"
+
+  # Open with your editor (defaults to nvim if EDITOR unset)
+  "${EDITOR:-nvim}" "$tmp"
+
+  # Copy back if it was modified
+  if [ "$tmp" -nt "$file" ]; then
+    doas cp -- "$tmp" "$file"
+  fi
+
+  rm -f -- "$tmp"
+done
