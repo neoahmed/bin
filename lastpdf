@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ -n "$1" ]; then
+    ln -sf "$(realpath "$1")" ~/.local/share/zathura/last.pdf
+    exec zathura "$@"
+else
+    [ -f ~/.local/share/zathura/last.pdf ] && exec zathura ~/.local/share/zathura/last.pdf
+fi
